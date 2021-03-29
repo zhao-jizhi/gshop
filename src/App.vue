@@ -1,13 +1,25 @@
 <template>
     <div id="app">
-      <router-view />
+      <!--缓存路由组件对象: keep-alive-->
+      <keep-alive>
+        <router-view />
+      </keep-alive>
       <FooterGuide v-show="$route.meta.showFooter" />
     </div>
 </template>
 
 <script>
+  import {mapActions} from 'vuex'
   import FooterGuide from './components/FooterGuide/FooterGuide'
   export default {
+    mounted(){
+      // this.$store.dispatch('getAddress')
+      this.getAddress()
+      this.getUserInfo()
+    },
+    methods :{
+      ...mapActions(['getAddress', 'getUserInfo'])
+    },
     components: {
       FooterGuide
     }

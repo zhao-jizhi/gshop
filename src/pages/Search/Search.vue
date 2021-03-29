@@ -1,18 +1,68 @@
 <template>
     <div class="search">
       <HeaderTop title="搜索" />
-      <form class="search_form" action="#">
-        <input type="search" name="search" placeholder="请输入商家或美食名称" class="search_input">
+      <form class="search_form" @submit.prevent="search">
+        <input type="search" name="search" placeholder="请输入商家或美食名称" class="search_input"v-model="keyword">
         <input type="submit" name="submit" class="search_submit">
       </form>
+      <section class="list" v-if="haveSearchShops">
+        <ul class="list_container">
+          <li class="list_li" v-for="(item, index) in searchShops" :key="index">
+            <section class="item_left">
+              <img :src="imgBaseUrl + item.image_path" class="restaurant_img">
+            </section>
+            <section class="item_right">
+              <div class="item_right_text">
+                <p>
+                  <span>{{item.name}}</span>
+                </p>
+                <p>月售{{item.recent_order_num}}单</p>
+                <p>{{item.delivery_fee||item.float_minimum_order_amount}}元起送 / 距离{{item.distance}}公里</p>
+              </div>
+            </section>
+          </li>
+        </ul>
+      </section>
+      <div class="search_none" v-else>很抱歉！无搜索结果</div>
     </div>
 </template>
 
 <script>
+  import {mapState} from 'vuex'
   import HeaderTop from '../../components/HeaderTop/HeaderTop'
   export default {
+    data () {
+      return {
+        keyword: '',
+        imgBaseUrl: 'http://cangdu.org:8001/img/',
+        haveSearchShops: true
+      }
+    },
+    computed: {
+      ...mapState(['searchShops'])
+    },
+    methods: {
+      search () {
+        const keyword = this.keyword.trim()
+        if (keyword) {
+          this.$store.dispatch('getSearchShops',keyword)
+          // console.log(keyword)
+        } else {
+          this.$router.go(0)
+        }
+      }
+    },
     components: {
       HeaderTop
+    },
+    watch: {
+      searchShops (value) {
+        if (!value.length) {
+          this.haveSearchShops = false
+        } else {
+          this.haveSearchShops = true
+        }
+      }
     }
   }
 </script>
@@ -46,4 +96,33 @@
           font-size 16px
           color #fff
           background-color #02a774
+    .list
+        .list_container
+          background-color: #fff;
+          .list_li
+            display: flex;
+            justify-content: center;
+            padding: 10px
+            border-bottom: 1px solid $bc;
+            .item_left
+              margin-right: 10px
+              .restaurant_img
+                width 50px
+                height 50px
+                display block
+            .item_right
+              font-size 12px
+              flex 1
+              .item_right_text
+                p
+                  line-height 12px
+                  margin-bottom 6px
+                  &:last-child
+                    margin-bottom 0
+    .search_none
+      margin: 0 auto
+      color: #333
+      background-color: #fff
+      text-align: center
+      margin-top: 0.125rem
 </style>
